@@ -21,6 +21,7 @@ public class BlockDoublePlantTransformer implements ITransformer {
         for (MethodNode methodNode : classNode.methods) {
             String methodName = mapMethodName(classNode, methodNode);
             if (methodName.equals("getActualState") || methodName.equals("func_176221_a")) {
+                BytecodeHelper.printEmAll(methodNode.instructions);
                 ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
                 LabelNode labelToEnd = null;
                 LabelNode labelToMapGetter = new LabelNode();
@@ -36,7 +37,9 @@ public class BlockDoublePlantTransformer implements ITransformer {
                             ((JumpInsnNode) node).label = labelToMapGetter;
                         } else if (node.getOpcode() == Opcodes.ASTORE && node.getPrevious().getOpcode() == Opcodes.INVOKEINTERFACE) {
                             String invokeName = mapMethodNameFromNode(node.getPrevious());
-                            if (((VarInsnNode) node).var == 1 && (invokeName.equals("withProperty") || invokeName.equals("func_177226_a"))
+                            if (
+                                    ((VarInsnNode) node).var == 1 &&
+                                    (invokeName.equals("withProperty") || invokeName.equals("func_177226_a"))
                             ) {
                                 methodNode.instructions.insert(node, getVariant(labelToEnd, labelToMapGetter));
                                 break;
@@ -55,17 +58,17 @@ public class BlockDoublePlantTransformer implements ITransformer {
         list.add(new JumpInsnNode(Opcodes.GOTO, labelToEnd));
 
         list.add(labelToMapGetter);
-        list.add(new FieldInsnNode(Opcodes.GETSTATIC, "net/minecraft/block/BlockDoublePlant", variantMap.name, variantMap.desc));
+        list.add(new FieldInsnNode(Opcodes.GETSTATIC, "agi", variantMap.name, variantMap.desc));
         list.add(new JumpInsnNode(Opcodes.IFNONNULL, labelToEnd)); // the map is never initialized, so the code below will never run, but it's presence breaks stuff
 
         //the issue is caused by the lines below
         list.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        list.add(new FieldInsnNode(Opcodes.GETSTATIC, "net/minecraft/block/BlockDoublePlant", "field_176493_a", "Lnet/minecraft/block/properties/PropertyEnum;")); // VARIANT
-            list.add(new FieldInsnNode(Opcodes.GETSTATIC, "net/minecraft/block/BlockDoublePlant", variantMap.name, variantMap.desc));
+        list.add(new FieldInsnNode(Opcodes.GETSTATIC, "agi", "a", "Lamo;")); // VARIANT
+            list.add(new FieldInsnNode(Opcodes.GETSTATIC, "agi", variantMap.name, variantMap.desc));
             list.add(new VarInsnNode(Opcodes.ALOAD, 3));
             list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/util/HashMap", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", false));
             list.add(new TypeInsnNode(Opcodes.CHECKCAST, "java/lang/Comparable"));
-        list.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "net/minecraft/block/state/IBlockState", "func_177226_a", "(Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState;", true)); // withProperty
+        list.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "alz", "a", "(Lamo;Ljava/lang/Comparable;)Lalz;", true)); // withProperty
         list.add(new VarInsnNode(Opcodes.ASTORE, 1));
         //the issue is caused by the lines above
 
